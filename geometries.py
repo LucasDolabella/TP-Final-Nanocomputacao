@@ -156,5 +156,5 @@ for input_file in sorted(INPUT_DIR.glob("Imput_*.txt")):
         print(f"  ✔ Espectro salvo: {spec_file}")
 
 print("\n🎉 Dataset final gerado com sucesso!")
-print("→ Imagens: results/geometries/imgs")
+print("→ Imagens: results/geometries")
 print("→ Espectros: results/spectrum")
