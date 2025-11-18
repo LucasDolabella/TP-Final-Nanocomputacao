@@ -15,7 +15,7 @@ MODELS_DIR = BASE_DIR / "results" / "models"
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 X = np.load(PREP_DIR / "X_images.npy")  # (N,128,128,1)
-Y = np.load(PREP_DIR / "Y_pca.npy")  # (N,20)
+Y = np.load(PREP_DIR / "Y_pca.npy")  # (N,30) agora
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -34,30 +34,35 @@ X_val, X_test, Y_val, Y_test = train_test_split(
 )
 
 print("\nDivisão dos dados:")
-print("Treino :", X_train.shape[0])
+print("Treino   :", X_train.shape[0])
 print("Validação:", X_val.shape[0])
-print("Teste  :", X_test.shape[0])
+print("Teste    :", X_test.shape[0])
 
 # =========================
 # DEFINIR MODELO CNN + MLP
 # =========================
 input_shape = (128, 128, 1)
-n_outputs = Y.shape[1]  # 20 componentes do PCA
+n_outputs = Y.shape[1]  # 30 componentes do PCA
 
 inputs = keras.Input(shape=input_shape)
 
-x = layers.Conv2D(8, (3, 3), activation="relu", padding="same")(inputs)
-x = layers.MaxPooling2D((2, 2))(x)
-
-x = layers.Conv2D(16, (3, 3), activation="relu", padding="same")(x)
+# Bloco conv mais forte
+x = layers.Conv2D(16, (3, 3), activation="relu", padding="same")(inputs)
 x = layers.MaxPooling2D((2, 2))(x)
 
 x = layers.Conv2D(32, (3, 3), activation="relu", padding="same")(x)
 x = layers.MaxPooling2D((2, 2))(x)
 
+x = layers.Conv2D(64, (3, 3), activation="relu", padding="same")(x)
+x = layers.MaxPooling2D((2, 2))(x)
+
 x = layers.Flatten()(x)
-x = layers.Dense(64, activation="relu")(x)
+
+# Cabeça MLP mais expressiva
+x = layers.Dense(128, activation="relu")(x)
 x = layers.Dropout(0.3)(x)
+x = layers.Dense(64, activation="relu")(x)
+x = layers.Dropout(0.2)(x)
 
 outputs = layers.Dense(n_outputs, activation="linear")(x)
 
@@ -76,15 +81,15 @@ model.compile(
 # =========================
 early_stop = keras.callbacks.EarlyStopping(
     monitor="val_loss",
-    patience=38,
+    patience=60,  # <-- mais paciência para mais dados / modelo maior
     restore_best_weights=True,
 )
 
 history = model.fit(
     X_train,
     Y_train,
-    epochs=300,
-    batch_size=8,
+    epochs=400,  # <-- dá mais espaço; early stopping corta antes
+    batch_size=16,  # <-- batch maior para dataset maior
     validation_data=(X_val, Y_val),
     callbacks=[early_stop],
     verbose=2,

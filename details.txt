@@ -14,3 +14,9 @@ ate 16 - 36% early stopping
 === Desempenho no conjunto de TESTE ===
 Test MSE (loss): 0.075499
 Test MAE      : 0.141445
+
+PCA = 30; ES = 60; more complex layers; input 17, 19
+=== Desempenho no conjunto de TESTE ===
+Test MSE (loss): 0.074444
+Test MAE      : 0.122575
+

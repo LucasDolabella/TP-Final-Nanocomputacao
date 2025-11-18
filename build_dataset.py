@@ -18,11 +18,11 @@ PREP_DIR = BASE_DIR / "results" / "prepared"
 PREP_DIR.mkdir(parents=True, exist_ok=True)
 
 # Estruturas presentes (pulando a 06, que não existe)
-STRUCTURES = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+STRUCTURES = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19]
 ANGLES = [0, 15, 30, 45, 60, 75]
 
 IMG_SIZE = 128
-N_PCA = 20
+N_PCA = 30  # <-- AUMENTADO PARA 30 COMPONENTES
 
 
 def load_spectrum(struct_id: int, angle_deg: float):
