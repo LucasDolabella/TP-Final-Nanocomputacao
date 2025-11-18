@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-set -e  # para o script parar se qualquer etapa falhar
+set -e  
 
 echo "=== Ativando ambiente virtual (.venv) ==="
-# Se o script estiver na raiz do projeto
+
 source .venv/bin/activate
 
 echo
