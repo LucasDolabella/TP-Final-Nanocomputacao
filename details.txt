@@ -20,6 +20,7 @@ PCA = 30; ES = 60; more complex layers; input 17, 19
 Test MSE (loss): 0.074444
 Test MAE      : 0.122575
 
+
 === Desempenho no conjunto de TESTE ===
 Test MSE (loss): 0.073293
 Test MAE      : 0.122644
