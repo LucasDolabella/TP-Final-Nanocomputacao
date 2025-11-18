@@ -46,7 +46,7 @@ n_outputs = Y.shape[1]  # 30 componentes do PCA
 
 inputs = keras.Input(shape=input_shape)
 
-# Bloco conv mais forte
+# Blocos convolucionais
 x = layers.Conv2D(16, (3, 3), activation="relu", padding="same")(inputs)
 x = layers.MaxPooling2D((2, 2))(x)
 
@@ -60,7 +60,7 @@ x = layers.Flatten()(x)
 
 # Cabeça MLP mais expressiva
 x = layers.Dense(128, activation="relu")(x)
-x = layers.Dropout(0.3)(x)
+x = layers.Dropout(0.35)(x)  # leve aumento no dropout
 x = layers.Dense(64, activation="relu")(x)
 x = layers.Dropout(0.2)(x)
 
@@ -77,21 +77,32 @@ model.compile(
 )
 
 # =========================
-# TREINAMENTO (com EarlyStopping)
+# CALLBACKS (EarlyStopping + LR Scheduler)
 # =========================
 early_stop = keras.callbacks.EarlyStopping(
     monitor="val_loss",
-    patience=60,  # <-- mais paciência para mais dados / modelo maior
+    patience=60,  # mais paciência p/ modelo maior
     restore_best_weights=True,
 )
 
+reduce_lr = keras.callbacks.ReduceLROnPlateau(
+    monitor="val_loss",
+    factor=0.5,  # divide lr por 2 quando estagnar
+    patience=15,  # espera 15 épocas sem melhorar
+    min_lr=1e-5,
+    verbose=1,
+)
+
+# =========================
+# TREINAMENTO
+# =========================
 history = model.fit(
     X_train,
     Y_train,
-    epochs=400,  # <-- dá mais espaço; early stopping corta antes
-    batch_size=16,  # <-- batch maior para dataset maior
+    epochs=400,  # early stopping vai cortar antes
+    batch_size=16,
     validation_data=(X_val, Y_val),
-    callbacks=[early_stop],
+    callbacks=[early_stop, reduce_lr],
     verbose=2,
 )
 
