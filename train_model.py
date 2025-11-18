@@ -76,7 +76,7 @@ model.compile(
 # =========================
 early_stop = keras.callbacks.EarlyStopping(
     monitor="val_loss",
-    patience=30,
+    patience=38,
     restore_best_weights=True,
 )
 

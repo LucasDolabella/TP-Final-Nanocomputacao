@@ -1,0 +1,16 @@
+ao colocar 17 e 19 o desempenho parece piorar, por que? o que mudar?
+
+até 16:
+=== Desempenho no conjunto de TESTE ===
+Test MSE (loss): 0.068430
+Test MAE      : 0.140937
+
+com 17, 19:
+=== Desempenho no conjunto de TESTE ===
+Test MSE (loss): 0.139050
+Test MAE      : 0.196935
+
+ate 16 - 36% early stopping
+=== Desempenho no conjunto de TESTE ===
+Test MSE (loss): 0.075499
+Test MAE      : 0.141445
