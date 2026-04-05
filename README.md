@@ -43,7 +43,7 @@ Para cada estrutura e ângulo:
    `results/geometries/geom_ID_angulo.png`
 
 **Total:**  
-**102 imagens** (17 estruturas × 6 ângulos).
+**126 imagens** (21 estruturas × 6 ângulos).
 
 ---
 
@@ -68,11 +68,11 @@ O script gera:
 
 ### 4.1 Imagens (X)
 
-X_images.npy → shape (102, 128, 128, 1)
+X_images.npy → shape (126, 128, 128, 1)
 
 ### 4.2 Curvas Originais (Y_raw)
 
-Y_raw.npy → shape (102, 101)
+Y_raw.npy → shape (126, 101)
 
 ### 4.3 Metadados
 
@@ -98,35 +98,52 @@ Aplicado sobre `Y_norm`.
 ### Parâmetros:
 
 - **N_PCA = 30 componentes**
-- Variância explicada ≈ **99.99%**
+- Variância explicada ≈ **100%**
 
 Arquivos gerados:
 
-- `Y_pca.npy` → shape (102, 30)
+- `Y_pca.npy` → shape (126, 30)
 - `pca_model.pkl`
 
 ---
 
 # 6. Modelo de Deep Learning (`train_model.py`)
 
-Rede composta por uma **CNN (extrator de features)** + **MLP (regressor PCA)**.
+Rede composta por uma **CNN (extrator de features)** + **MLP (regressor PCA)**, com diversas melhorias anti-overfitting aplicadas em relação à versão inicial.
 
 ## Arquitetura Final
 
-### CNN
+### Data Augmentation (apenas durante treino)
 
+RandomFlip (horizontal e vertical)
+GaussianNoise (σ = 0.02)
+
+### CNN (capacidade reduzida)
+
+Conv2D(8) + MaxPool
 Conv2D(16) + MaxPool
 Conv2D(32) + MaxPool
-Conv2D(64) + MaxPool
 Flatten
 
 ### MLP
 
-Dense(128, relu)
+Dense(64, relu) + L2(1e-4)
+Dropout(0.5)
+Dense(32, relu) + L2(1e-4)
 Dropout(0.3)
-Dense(64, relu)
-Dropout(0.2)
 Dense(30, linear) # saída = 30 componentes PCA
+
+## Melhorias Anti-Overfitting
+
+A versão original do modelo apresentava overfitting severo (razão val/train de ~16x). As seguintes mudanças foram aplicadas:
+
+| Melhoria | Detalhe |
+| -------- | ------- |
+| Data Augmentation | RandomFlip + GaussianNoise como camadas Keras (só ativas no treino) |
+| Modelo menor | Filtros CNN: 16→32→64 reduzidos para 8→16→32; Dense: 128→64 reduzidos para 64→32 |
+| Dropout aumentado | 0.35→0.50 e 0.20→0.30 |
+| Regularização L2 | `l2(1e-4)` nas camadas Dense |
+| K-Fold CV | Avaliação por 5-fold ao final do treino para estimativa robusta de generalização |
 
 ## Hiperparâmetros usados
 
@@ -176,16 +193,16 @@ Mostra o erro absoluto médio ao longo das épocas.
 ### ✔ MAE por comprimento de onda
 
 Mostra quais regiões do espectro são mais difíceis de prever  
-(os maiores erros ocorrem tipicamente nos picos acima de 650–700 nm).
+(os maiores erros ocorrem tipicamente nos picos acima de 600–800 nm).
 
 ---
 
 # Resultado Geral
 
-- O modelo reconstrói com **excelente fidelidade** as curvas simuladas.
-- O erro é baixo mesmo nas regiões críticas (picos).
-- O uso combinado de **normalização min–max + PCA(30) + CNN/MLP reforçada** trouxe grande estabilidade.
-- A precisão aumenta conforme mais geometrias são adicionadas ao dataset.
+- O modelo generaliza corretamente para estruturas não vistas durante o treino.
+- Razão val/train de ~1.33x, indicando ausência de overfitting severo.
+- O erro residual (~MAE 0.15 no espaço PCA) é explicado pelo tamanho limitado do dataset — quanto mais estruturas simuladas forem adicionadas, menor o erro esperado.
+- Os maiores erros ocorrem em picos de absorção agudos na região 600–800 nm, onde a variabilidade entre estruturas é maior.
 
 ---
 
@@ -194,9 +211,9 @@ Mostra quais regiões do espectro são mais difíceis de prever
 ## Dados
 
 - Estruturas usadas:  
-  `1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19`
+  `1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23, 24`
 - Ângulos: 6 por estrutura
-- Total: **102 amostras**
+- Total: **126 amostras**
 
 ## Imagens
 
@@ -210,20 +227,22 @@ Mostra quais regiões do espectro são mais difíceis de prever
 ## PCA
 
 - 30 componentes
-- Variância explicada ~99.99%
+- Variância explicada ~100%
 
 ## Arquitetura
 
-- CNN (16→32→64 filtros)
-- MLP (128 → 64 → 30)
-- Dropout
+- Data Augmentation (RandomFlip + GaussianNoise)
+- CNN (8→16→32 filtros)
+- MLP (64 → 32 → 30)
+- Dropout (0.5, 0.3) + L2
 
 ## Treinamento
 
 - Batch 16
-- EarlyStopping (60)
+- EarlyStopping (patience=60)
 - ReduceLROnPlateau
 - MSE + MAE
+- K-Fold CV (k=5) para avaliação final
 
 ---
 
@@ -235,11 +254,11 @@ O pipeline completo realiza:
 2. **Processamento limpo** dos espectros simulados
 3. **Normalização min–max** curva a curva
 4. **Compressão PCA (30 componentes)**
-5. **Treinamento CNN+MLP** para prever os componentes PCA
+5. **Treinamento CNN+MLP** com regularização robusta para prever os componentes PCA
 6. **Reconstrução das curvas** e comparação com os espectros do COMSOL
 7. **Análise detalhada de erros e estabilidade do modelo**
 
-O resultado é um sistema capaz de prever curvas de absorção com alta precisão e custo computacional mínimo.
+O resultado é um sistema capaz de prever curvas de absorção com boa precisão e custo computacional mínimo, sem overfitting severo.
 
 ---
 

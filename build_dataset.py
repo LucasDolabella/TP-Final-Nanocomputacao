@@ -37,7 +37,7 @@ PREP_DIR = BASE_DIR / "results" / "prepared"  # Dados processados para treinamen
 PREP_DIR.mkdir(parents=True, exist_ok=True)
 
 # Estruturas presentes no dataset (estrutura 06 não existe nos dados)
-STRUCTURES = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19]
+STRUCTURES = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23, 24]
 
 # Ângulos de rotação disponíveis para cada geometria (em graus)
 ANGLES = [0, 15, 30, 45, 60, 75]
