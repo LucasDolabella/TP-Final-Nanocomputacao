@@ -69,16 +69,19 @@ def build_model(input_shape=(128, 128, 1), n_outputs=30):
     # RandomFlip assume que a resposta espectral é simétrica sob reflexão.
     # Se as geometrias forem assimétricas, remova o RandomFlip.
     x = layers.RandomFlip("horizontal_and_vertical")(inputs)
-    x = layers.GaussianNoise(0.02)(x)   # ruído leve para robustez
+    x = layers.GaussianNoise(0.05)(x)   # ruído aumentado para geometrias binárias
 
-    # --- Blocos Convolucionais (capacidade reduzida) ---
-    x = layers.Conv2D(8,  (3, 3), activation="relu", padding="same")(x)
+    # --- Blocos Convolucionais (com L2 nas Conv) ---
+    x = layers.Conv2D(8,  (3, 3), activation="relu", padding="same",
+                      kernel_regularizer=regularizers.l2(1e-4))(x)
     x = layers.MaxPooling2D((2, 2))(x)
 
-    x = layers.Conv2D(16, (3, 3), activation="relu", padding="same")(x)
+    x = layers.Conv2D(16, (3, 3), activation="relu", padding="same",
+                      kernel_regularizer=regularizers.l2(1e-4))(x)
     x = layers.MaxPooling2D((2, 2))(x)
 
-    x = layers.Conv2D(32, (3, 3), activation="relu", padding="same")(x)
+    x = layers.Conv2D(32, (3, 3), activation="relu", padding="same",
+                      kernel_regularizer=regularizers.l2(1e-4))(x)
     x = layers.MaxPooling2D((2, 2))(x)
 
     x = layers.Flatten()(x)
