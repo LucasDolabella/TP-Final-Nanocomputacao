@@ -141,7 +141,7 @@ if __name__ == "__main__":
     # Lista de índices para gerar comparações
     # Índices escolhidos para cobrir diferentes partes do dataset
     # Total de amostras: 102 (17 estruturas × 6 ângulos)
-    exemplos = [0, 5, 20, 35, 50]
+    exemplos = [0, 5, 20, 35, 50, 102, 108, 114, 120]
     
     print("\n=== Gerando comparações SIM vs DL ===")
     for idx in exemplos:
