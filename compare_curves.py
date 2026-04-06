@@ -138,15 +138,18 @@ if __name__ == "__main__":
     - Se o modelo captura picos e vales importantes
     - Possíveis regiões espectrais com maior/menor erro
     """
-    # Lista de índices para gerar comparações
-    # Índices escolhidos para cobrir diferentes partes do dataset
-    # Total de amostras: 102 (17 estruturas × 6 ângulos)
-    exemplos = [0, 5, 20, 35, 50, 102, 108, 114, 120]
-    
-    print("\n=== Gerando comparações SIM vs DL ===")
-    for idx in exemplos:
-        # Verifica se o índice é válido (dentro do range do dataset)
-        if idx < len(X):
-            plot_example(idx)
+    # Replica a mesma divisão do train_model.py (random_state=42)
+    # para identificar apenas as amostras do conjunto de teste
+    from sklearn.model_selection import train_test_split
+    indices = np.arange(len(X))
+    _, idx_temp = train_test_split(indices, test_size=0.3, random_state=42)
+    _, idx_test = train_test_split(idx_temp, test_size=0.5, random_state=42)
+
+    print(f"\n=== Gerando comparações SIM vs DL (conjunto de teste: {len(idx_test)} amostras) ===")
+    for idx in sorted(idx_test):
+        struct_id = int(metadata[idx, 0])
+        angle     = int(metadata[idx, 1])
+        print(f"  Estrutura {struct_id:02d}, {angle}°")
+        plot_example(idx)
     
     print(f"\n✓ Gráficos salvos em: {COMP_DIR.resolve()}")

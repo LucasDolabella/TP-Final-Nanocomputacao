@@ -227,11 +227,12 @@ Para cada amostra selecionada:
 4. Desfaz a normalização min-max → curva na escala física original
 5. Plota **SIM** (curva do COMSOL) vs **DL** (curva predita)
 
-O script gera comparações para:
-- Alguns exemplos representativos do dataset (índices 0, 5, 20, 35, 50)
-- As estruturas 21, 22, 23 e 24 no ângulo 0°
+O script replica a mesma divisão aleatória do `train_model.py` (`random_state=42`) e gera comparações **exclusivamente para as 19 amostras do conjunto de teste** — estruturas que o modelo nunca viu durante o treino. Isso garante que os gráficos reflitam capacidade real de generalização, não memorização.
 
-**Saídas:** `results/comparisons/comparison_ID_angulo.png`
+**Por que só o conjunto de teste?**  
+Das 126 amostras, ~88 foram usadas no treino. Gerar comparações para essas produziria curvas artificialmente boas, pois o modelo já as "memorizou" parcialmente. Usar só o teste é a avaliação cientificamente honesta.
+
+**Saídas:** `results/comparisons/comparison_ID_angulo.png` (19 arquivos)
 
 #### Interpretação dos Resultados
 
